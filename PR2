@@ -1,0 +1,105 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+template<typename T>
+class TaskADT {
+private:
+    int n; // количество элементов в массиве
+    std::vector<T> A; // список значений элементов
+    int pos; // позиция элемента
+
+public:
+    // Конструктор
+    TaskADT() : n(0), pos(-1) {}
+
+    // Ввод массива с клавиатуры
+    void inputArray() {
+        std::cout << "Enter the number of elements: ";
+        std::cin >> n;
+        A.resize(n);
+        std::cout << "Enter " << n << " elements:" << std::endl;
+        for (int i = 0; i < n; ++i) {
+            std::cin >> A[i];
+        }
+    }
+
+    // Определить, упорядочены ли значения в массиве по убыванию
+    bool checkDescendingOrder() {
+        for (int i = 0; i < n - 1; ++i) {
+            if (A[i] < A[i + 1]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Удалить из массива элементы, значения которых содержат цифру 5
+    void deleteElementsWithDigit5() {
+        A.erase(std::remove_if(A.begin(), A.end(), [](T num) { return containsFive(num); }), A.end());
+        n = A.size();
+    }
+
+    // Вставить новый элемент в массив перед элементом с меньшим его по значению
+    void insertBeforeSmaller(const T& value) {
+        int i = 0;
+        while (i < n && A[i] >= value) {
+            ++i;
+        }
+        A.insert(A.begin() + i, value);
+        ++n;
+    }
+
+    // Вывод массива в консоль
+    void printArray() {
+        std::cout << "Array:";
+        for (int i = 0; i < n; ++i) {
+            std::cout << " " << A[i];
+        }
+        std::cout << std::endl;
+    }
+
+private:
+    // Проверка, содержит ли число цифру 5
+    static bool containsFive(T num) {
+        while (num != 0) {
+            if (num % 10 == 5) {
+                return true;
+            }
+            num /= 10;
+        }
+        return false;
+    }
+};
+
+int main() {
+    srand(time(nullptr));
+
+    // Пример использования
+    TaskADT<int> task;
+
+    // Ввод массива с клавиатуры
+    task.inputArray();
+
+    // Вывод массива в консоль
+    task.printArray();
+
+    // Проверка на упорядоченность по убыванию
+    if (task.checkDescendingOrder()) {
+        std::cout << "Array is ordered in descending order." << std::endl;
+        // Вставка нового элемента перед элементом с меньшим значением
+        int value;
+        std::cout << "Enter the value to insert before smaller elements: ";
+        std::cin >> value;
+        task.insertBeforeSmaller(value);
+    } else {
+        std::cout << "Array is not ordered in descending order." << std::endl;
+        // Удаление элементов, содержащих цифру 5
+        task.deleteElementsWithDigit5();
+    }
+
+    // Вывод массива после выполнения операций
+    task.printArray();
+
+    return 0;
+}
