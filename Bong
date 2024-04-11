@@ -1,1 +1,52 @@
+//#include <bits/stdc++.h>
+#include<iostream>
+#define Max 20
+using namespace std;
+int n, sum = 0;
+int Bool[Max] = { 0 };
+int A[Max];
 
+void Xuat(int n)
+{
+    for (int i = 1; i <= n; i++)
+    {
+        if (A[i] == i)
+            sum++;
+    }
+}
+
+void perestanovka(int k)
+{
+    for (int i = 1; i <= n; i++)
+    {
+        if (!Bool[i])
+        {
+            A[k] = i;
+            Bool[i] = 1;
+            if (k == n) Xuat(n);
+            else perestanovka(k + 1);
+            Bool[i] = 0;
+        }
+    }
+}
+
+int calculate_k(int n) {
+    if (n == 1 || n == 2) {
+        return 1;
+    } else {
+        return (calculate_k(n - 1) + calculate_k(n - 2)) * (n - 1);
+    }
+}
+
+int main()
+{
+    cout << "Enter n: ";
+    cin >> n;
+    if (!n) { cout << "error"; return 1; }
+    if (n < 0) { cout << "error"; return 1; }
+    perestanovka(1);
+    cout << "P("<<n<<"!)" << sum << endl;
+    int result = calculate_k(n);
+    cout << "k(" << n << ") = " << result;
+    return 0;
+}
