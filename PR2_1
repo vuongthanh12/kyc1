@@ -1,0 +1,93 @@
+#include <iostream>
+const int MAX_SIZE = 100; // максимальный размер статического массива
+
+class Set {
+private:
+    int elements[MAX_SIZE]; // Статический массив для хранения элементов множества
+    int size;      // Текущий размер множества
+
+public:
+    // Конструктор для инициализации множества
+    Set() : size(0) {}
+
+    // Удалить элемент в заданной позиции (pos <= n)
+    void deleteElement(int pos) {
+        if (pos < 0 || pos >= size) {
+            // Позиция для удаления некорректна
+            std::cout << "Invalid position for deletion." << std::endl;
+            return;
+        }
+
+        for (int i = pos; i < size - 1; ++i) {
+            elements[i] = elements[i + 1];
+        }
+        --size;
+    }
+
+    // Вставить элемент в заданную позицию (pos <= n)
+    void insertElement(int pos, int value) {
+        if (pos < 0 || pos > size) {
+            // Позиция для вставки некорректна
+            std::cout << "Invalid position for insertion." << std::endl;
+            return;
+        }
+
+        for (int i = size; i > pos; --i) {
+            elements[i] = elements[i - 1];
+        }
+        elements[pos] = value;
+        ++size;
+    }
+
+    // Вывести элементы множества
+    void printElements() {
+        std::cout << "Set elements:";
+        for (int i = 0; i < size; ++i) {
+            std::cout << " " << elements[i];
+        }
+        std::cout << std::endl;
+    }
+};
+
+int main() {
+    // Пример использования класса Set
+    Set set;
+
+    // Вводим количество элементов в множестве
+    int numElements;
+    std::cout << "Enter the number of elements to insert: ";
+    std::cin >> numElements;
+
+    // Вводим элементы множества
+    std::cout << "Enter " << numElements << " elements:" << std::endl;
+    for (int i = 0; i < numElements; ++i) {
+        int element;
+        std::cin >> element;
+        set.insertElement(i, element);
+    }
+
+    // Выводим элементы множества
+    set.printElements();
+
+    // Удаляем элемент из заданной позиции
+    int deletePosition;
+    std::cout << "Enter the position to delete an element: ";
+    std::cin >> deletePosition;
+    set.deleteElement(deletePosition);
+
+    // Выводим элементы множества после удаления
+    set.printElements();
+
+    // Вставляем новый элемент в заданную позицию
+    int insertPosition, newValue;
+    std::cout << "Enter the value to insert: ";
+    std::cin >> newValue;
+    std::cout << "Enter the position to insert the value: ";
+    std::cin >> insertPosition;
+    set.insertElement(insertPosition, newValue);
+
+    // Выводим элементы множества после вставки
+    set.printElements();
+
+    return 0;
+}
