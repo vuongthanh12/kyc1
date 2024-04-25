@@ -1,0 +1,134 @@
+#include <iostream>
+#include <random>
+#include <chrono>
+
+using namespace std;
+
+const int n = 100000;
+
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+            }
+        }
+    }
+}
+
+void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] < key) {
+            arr[j + 1] = arr[j];
+            j = j - 1;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+void bubbleSort_phantich(int arr[], int n, int &Suni_sosanh, int &Suni_swap) {
+    Suni_sosanh = 0;
+    Suni_swap = 0;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            Suni_sosanh++;
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                Suni_swap++;
+            }
+        }
+    }
+}
+
+void insertionSort_phantich(int arr[], int n, int &Suni_sosanh, int &Suni_swap) {
+    Suni_sosanh = 0;
+    Suni_swap = 0;
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        Suni_sosanh++;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            Suni_swap++;
+            j = j - 1;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+int main()
+{
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> dis(1, 100);
+    
+    int shlArr[n];
+    int shlArr_compl[n];
+    
+    for (int i = 0; i < n; ++i) {
+        int randomNumber = dis(gen);
+        shlArr[i] = randomNumber;
+    }
+    
+    cout << "Before: ";
+    for (int a = 0; a < n; ++a) {
+        cout << shlArr[a] << "   ";
+    }
+    cout << endl << "-----" << endl;
+    
+    cout << "Opt: "; int opt;
+    cin >> opt;
+    while (opt != 0) {
+        if (opt == 1) {
+            for (int i = 0; i < n; ++i) {
+                shlArr_compl[i] = shlArr[i];
+            }
+            
+            int sosanh, hoandoi;
+            
+            auto start = chrono::high_resolution_clock::now(); //start clock
+            bubbleSort_phantich(shlArr_compl, n, sosanh, hoandoi);
+            auto end = chrono::high_resolution_clock::now(); //end clock
+            
+            cout << "After:  ";
+            for (int a = 0; a < n; ++a) {
+                cout << shlArr_compl[a] << "   ";
+            } 
+            cout << endl << "---" << endl;
+            
+            chrono::duration<double, micro> elapsed_time = end - start;
+            cout << "Time: " << elapsed_time.count() << " microseconds" << endl;
+            cout << "So_sanh: " << sosanh << endl;
+            cout << "Hoan_doi: " << hoandoi;
+        }
+        
+        if (opt == 2) {
+            for (int i = 0; i < n; ++i) {
+                shlArr_compl[i] = shlArr[i];
+            }
+            
+            int sosanh, hoandoi;
+            
+            auto start = chrono::high_resolution_clock::now(); //start clock
+            insertionSort_phantich(shlArr_compl, n, sosanh, hoandoi);
+            auto end = chrono::high_resolution_clock::now(); //end clock
+            
+            cout << "After:  ";
+            for (int a = 0; a < n; ++a) {
+                cout << shlArr_compl[a] << "   ";
+            } 
+            cout << endl << "---" << endl;
+            
+            chrono::duration<double, micro> elapsed_time = end - start;
+            cout << "Time: " << elapsed_time.count() << " microseconds" << endl;
+            cout << "So_sanh: " << sosanh << endl;
+            cout << "Hoan_doi: " << hoandoi;
+        }
+        
+        cout << endl << "-----" << endl << "Opt: "; cin >> opt;
+    }
+
+    return 0;
+}
