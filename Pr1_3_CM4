@@ -1,0 +1,143 @@
+// sorting_performance.cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <random>
+
+// Шейкерная сортировка (Cocktail Sort)
+void cocktailSort(std::vector<int>& arr) {
+    bool swapped = true;
+    int start = 0;
+    int end = arr.size() - 1;
+
+    while (swapped) {
+        swapped = false;
+
+        // Прямой проход
+        for (int i = start; i < end; ++i) {
+            if (arr[i] > arr[i + 1]) {
+                std::swap(arr[i], arr[i + 1]);
+                swapped = true;
+            }
+        }
+
+        if (!swapped) {
+            break;
+        }
+
+        swapped = false;
+        end--;
+
+        // Обратный проход
+        for (int i = end - 1; i >= start; --i) {
+            if (arr[i] > arr[i + 1]) {
+                std::swap(arr[i], arr[i + 1]);
+                swapped = true;
+            }
+        }
+        start++;
+    }
+}
+
+// Сортировка слиянием (Merge Sort)
+void merge(std::vector<int>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    // Вспомогательные массивы
+    std::vector<int> leftPart(n1);
+    std::vector<int> rightPart(n2);
+
+    // Заполнение вспомогательных массивов
+    for (int i = 0; i < n1; ++i) {
+        leftPart[i] = arr[left + i];
+    }
+    for (int i = 0; i < n2; ++i) {
+        rightPart[i] = arr[mid + 1 + i];
+    }
+
+    // Слияние массивов
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (leftPart[i] <= rightPart[j]) {
+            arr[k] = leftPart[i];
+            i++;
+        }
+        else {
+            arr[k] = rightPart[j];
+            j++;
+        }
+        k++;
+    }
+
+    // Копирование оставшихся элементов
+    while (i < n1) {
+        arr[k] = leftPart[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = rightPart[j];
+        j++;
+        k++;
+    }
+}
+
+// Рекурсивная сортировка слиянием
+void mergeSort(std::vector<int>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Сортировка левой и правой частей
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+
+        // Слияние отсортированных частей
+        merge(arr, left, mid, right);
+    }
+}
+
+// Функция для заполнения массива случайными числами
+void fillRandomArray(std::vector<int>& arr) {
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_int_distribution<int> dist(1, 100000);
+
+    for (int& val : arr) {
+        val = dist(rng);
+    }
+}
+
+// Функция для измерения времени выполнения сортировки
+template <typename SortFunction>
+double measureSortTime(SortFunction sortFunction, std::vector<int>& arr) {
+    auto start = std::chrono::high_resolution_clock::now();  // старт измерения времени
+    sortFunction(arr);  // выполнение сортировки
+    auto end = std::chrono::high_resolution_clock::now();    // окончание измерения времени
+    auto duration = std::chrono::duration<double, std::milli>(end - start);  // время выполнения
+    return duration.count();
+}
+
+// Главная программа
+int main() {
+    std::vector<int> testSizes = { 100, 1000, 10000, 100000, 1000000 };  // размеры массивов для тестирования
+
+    std::cout << "Размер массива\tШейкерная сортировка (ms)\tСортировка слиянием (ms)\n";
+
+    for (int size : testSizes) {
+        std::vector<int> arr(size);
+
+        // Измерение времени шейкерной сортировки
+        fillRandomArray(arr);  // заполнение массива случайными числами
+        double timeCocktail = measureSortTime(cocktailSort, arr);
+
+        // Измерение времени сортировки слиянием
+        fillRandomArray(arr);  // повторное заполнение массива
+        double timeMerge = measureSortTime([&](std::vector<int>& array) { mergeSort(array, 0, array.size() - 1); }, arr);
+
+        std::cout << size << "\t\t" << timeCocktail << " ms\t\t" << timeMerge << " ms\n";
+    }
+
+    return 0;
+}
