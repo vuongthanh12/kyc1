@@ -1,0 +1,248 @@
+#include <iostream>
+#include <string>
+
+// Определение структуры узла
+struct Node {
+    std::string accountNumber;  // Номер счета в банке (20-значное число)
+    std::string date;           // Дата
+    std::string transactionType;// Вид операции (приход или расход)
+    double amount;              // Сумма вклада
+
+    Node* next;  // Указатель на следующий узел
+    Node* prev;  // Указатель на предыдущий узел
+
+    Node(std::string accNum, std::string dt, std::string transType, double amt)
+        : accountNumber(accNum), date(dt), transactionType(transType), amount(amt), next(nullptr), prev(nullptr) {}
+};
+
+// Определение класса для операций над списком
+class DoublyLinkedList {
+private:
+    Node* head;
+    Node* tail;
+
+public:
+    DoublyLinkedList();
+    ~DoublyLinkedList();
+
+    void createList();
+    void insertNode(std::string accNum, std::string dt, std::string transType, double amt);
+    void deleteNode(std::string accNum);
+    void displayList() const;
+    void displayListReverse() const;
+    Node* searchNode(std::string accNum) const;
+    void insertBeforeFirstNode(std::string accNum, std::string dt, std::string transType, double amt);
+    void deleteZeroBalanceAccounts();
+    DoublyLinkedList createBalanceList() const;
+    double calculateTotalBalance(Node* node) const;
+};
+
+// Реализация методов класса
+DoublyLinkedList::DoublyLinkedList() : head(nullptr), tail(nullptr) {}
+
+DoublyLinkedList::~DoublyLinkedList() {
+    Node* current = head;
+    Node* nextNode;
+    while (current != nullptr) {
+        nextNode = current->next;
+        delete current;
+        current = nextNode;
+    }
+}
+
+void DoublyLinkedList::createList() {
+    head = nullptr;
+    tail = nullptr;
+}
+
+void DoublyLinkedList::insertNode(std::string accNum, std::string dt, std::string transType, double amt) {
+    Node* newNode = new Node(accNum, dt, transType, amt);
+    if (head == nullptr) {
+        head = tail = newNode;
+    } else {
+        tail->next = newNode;
+        newNode->prev = tail;
+        tail = newNode;
+    }
+}
+
+void DoublyLinkedList::deleteNode(std::string accNum) {
+    Node* current = head;
+    while (current != nullptr) {
+        if (current->accountNumber == accNum) {
+            if (current->prev != nullptr) {
+                current->prev->next = current->next;
+            } else {
+                head = current->next;
+            }
+            if (current->next != nullptr) {
+                current->next->prev = current->prev;
+            } else {
+                tail = current->prev;
+            }
+            delete current;
+            return;
+        }
+        current = current->next;
+    }
+}
+
+void DoublyLinkedList::displayList() const {
+    Node* current = head;
+    while (current != nullptr) {
+        std::cout << "Account: " << current->accountNumber 
+                  << ", Date: " << current->date 
+                  << ", Type: " << current->transactionType 
+                  << ", Amount: " << current->amount << std::endl;
+        current = current->next;
+    }
+}
+
+void DoublyLinkedList::displayListReverse() const {
+    Node* current = tail;
+    while (current != nullptr) {
+        std::cout << "Account: " << current->accountNumber 
+                  << ", Date: " << current->date 
+                  << ", Type: " << current->transactionType 
+                  << ", Amount: " << current->amount << std::endl;
+        current = current->prev;
+    }
+}
+
+Node* DoublyLinkedList::searchNode(std::string accNum) const {
+    Node* current = head;
+    while (current != nullptr) {
+        if (current->accountNumber == accNum) {
+            return current;
+        }
+        current = current->next;
+    }
+    return nullptr;
+}
+
+void DoublyLinkedList::insertBeforeFirstNode(std::string accNum, std::string dt, std::string transType, double amt) {
+    Node* newNode = new Node(accNum, dt, transType, amt);
+    if (head == nullptr) {
+        head = tail = newNode;
+    } else {
+        newNode->next = head;
+        head->prev = newNode;
+        head = newNode;
+    }
+}
+
+void DoublyLinkedList::deleteZeroBalanceAccounts() {
+    Node* current = head;
+    while (current != nullptr) {
+        double totalBalance = calculateTotalBalance(current);
+        if (totalBalance == 0) {
+            Node* toDelete = current;
+            current = current->next;
+            deleteNode(toDelete->accountNumber);
+        } else {
+            current = current->next;
+        }
+    }
+}
+
+double DoublyLinkedList::calculateTotalBalance(Node* node) const {
+    double total = 0;
+    Node* current = node;
+    while (current != nullptr && current->accountNumber == node->accountNumber) {
+        if (current->transactionType == "приход") {
+            total += current->amount;
+        } else {
+            total -= current->amount;
+        }
+        current = current->next;
+    }
+    return total;
+}
+
+DoublyLinkedList DoublyLinkedList::createBalanceList() const {
+    DoublyLinkedList balanceList;
+    Node* current = head;
+    while (current != nullptr) {
+        double totalBalance = calculateTotalBalance(current);
+        balanceList.insertNode(current->accountNumber, "current_date", "приход", totalBalance);
+        current = current->next;
+    }
+    return balanceList;
+}
+
+// Главная программа с текстовым меню
+void displayMenu() {
+    std::cout << "1. Создание списка\n";
+    std::cout << "2. Вставка узла\n";
+    std::cout << "3. Удаление узла\n";
+    std::cout << "4. Вывод списка\n";
+    std::cout << "5. Вывод списка в обратном порядке\n";
+    std::cout << "6. Поиск узла\n";
+    std::cout << "7. Вставка нового узла перед первым узлом\n";
+    std::cout << "8. Удаление счетов с нулевым балансом\n";
+    std::cout << "9. Создание списка остатков\n";
+    std::cout << "0. Выход\n";
+}
+
+int main() {
+    DoublyLinkedList list;
+    int choice;
+    std::string accNum, date, transType;
+    double amount;
+
+    do {
+        displayMenu();
+        std::cout << "Выберите действие: ";
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1:
+                list.createList();
+                std::cout << "Список создан.\n";
+                break;
+            case 2:
+                std::cout << "Введите номер счета, дату, вид операции (приход/расход), сумму: ";
+                std::cin >> accNum >> date >> transType >> amount;
+                list.insertNode(accNum, date, transType, amount);
+                break;
+            case 3:
+                std::cout << "Введите номер счета для удаления: ";
+                std::cin >> accNum;
+                list.deleteNode(accNum);
+                break;
+            case 4:
+                list.displayList();
+                break;
+            case 5:
+                list.displayListReverse();
+                break;
+            case 6:
+                std::cout << "Введите номер счета для поиска: ";
+                std::cin >> accNum;
+                if (list.searchNode(accNum)) {
+                    std::cout << "Узел найден.\n";
+                } else {
+                    std::cout << "Узел не найден.\n";
+                }
+                break;
+            case 7:
+                std::cout << "Введите номер счета, дату, вид операции (приход/расход), сумму для вставки перед первым узлом: ";
+                std::cin >> accNum >> date >> transType >> amount;
+                list.insertBeforeFirstNode(accNum, date, transType, amount);
+                break;
+            case 8:
+                list.deleteZeroBalanceAccounts();
+                std::cout << "Удалены все счета с нулевым балансом.\n";
+                break;
+            case 9:
+                {
+                    DoublyLinkedList balanceList = list.createBalanceList();
+                    std::cout << "Список остатков:\n";
+                    balanceList.displayList();
+                }
+                break;
+        }
+    } while (choice != 0);
+
+    return 0;
+}
